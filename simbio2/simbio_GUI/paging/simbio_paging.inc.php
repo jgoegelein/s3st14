@@ -1,6 +1,6 @@
 <?php
 /**
- * simbio_paging_ajax
+ * simbio_paging
  * Paging Generator class
  *
  * Copyright (C) 2007,2008  Arie Nugraha (dicarve@yahoo.com)

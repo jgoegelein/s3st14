@@ -154,8 +154,10 @@ if (isset($_GET['action']) AND $_GET['action'] == 'print') {
     // create html ouput of images
     $html_str = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
     $html_str .= '<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Document Label Print Result</title>'."\n";
-    $html_str .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />';
-    $html_str .= '<meta http-equiv="Pragma" content="no-cache" /><meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0" /><meta http-equiv="Expires" content="Sat, 26 Jul 1997 05:00:00 GMT" />';
+    $html_str .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'."\n";
+    $html_str .= '<meta http-equiv="Pragma" content="no-cache" />'."\n";
+    $html_str .= '<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0" />'."\n";
+    $html_str .= '<meta http-equiv="Expires" content="Sat, 26 Jul 1997 05:00:00 GMT" />'."\n";
     $html_str .= '<style type="text/css">'."\n";
     $html_str .= 'body { padding: 0; margin: 1cm; font-family: '.$fonts.'; font-size: '.$font_size.'; }'."\n";
     $html_str .= '.labelStyle { width: '.$box_width.'cm; height: '.$box_height.'cm; text-align: center; margin: '.$items_margin.'cm; padding: 0; border: '.$border_size.'px solid #000000; }'."\n";
@@ -163,21 +165,23 @@ if (isset($_GET['action']) AND $_GET['action'] == 'print') {
     $html_str .= '</style>'."\n";
     $html_str .= '</head>'."\n";
     $html_str .= '<body>'."\n";
-    $html_str .= '<table style="margin: 0; padding: 0;" cellspacing="0" cellpadding="0">'."\n";
+    $html_str .= '<table border="1"; style="margin: 0; padding: 0;" cellspacing="0" cellpadding="0">'."\n";
     // loop the chunked arrays to row
     foreach ($chunked_label_arrays as $label_data) {
         $html_str .= '<tr>'."\n";
         foreach ($label_data as $label) {
-            $html_str .= '<td valign="top">';
-            $html_str .= '<div class="labelStyle" valign="top">';
-            if ($include_header_text) { $html_str .= '<div class="labelHeaderStyle">'.($header_text?$header_text:$sysconf['library_name']).'</div>'; }
+            $html_str .= '<td valign="top">'."\n";
+            $html_str .= '<div class="labelStyle" valign="top">'."\n";
+            if ($include_header_text) {
+                $html_str .= '   <div class="labelHeaderStyle">'.($header_text?$header_text:$sysconf['library_name']).'</div>'."\n";
+            }
             // explode label data by space
             $sliced_label = explode(' ', $label, 5);
             foreach ($sliced_label as $slice_label_item) {
-                $html_str .= $slice_label_item.'<br />';
+                $html_str .= $slice_label_item.'<br />'."\n";
             }
-            $html_str .= '</div>';
-            $html_str .= '</td>';
+            $html_str .= '</div>'."\n";
+            $html_str .= '</td>'."\n";
         }
         $html_str .= '</tr>'."\n";
     }
@@ -200,23 +204,26 @@ if (isset($_GET['action']) AND $_GET['action'] == 'print') {
 /* search form */
 ?>
 <fieldset class="menuBox">
-<div class="menuBoxInner printIcon">
-    <?php echo __('Labels Printing'); ?> - <a target="blindSubmit" href="<?php echo MODULES_WEB_ROOT_DIR; ?>bibliography/dl_print.php?action=print" class="notAJAX headerText2"><?php echo __('Print Labels for Selected Data'); ?></a>
-    &nbsp; <a target="blindSubmit" href="<?php echo MODULES_WEB_ROOT_DIR; ?>bibliography/dl_print.php?action=clear" class="notAJAX headerText2" style="color: #FF0000;"><?php echo __('Clear Print Queue'); ?></a>
-    <hr />
-    <form name="search" action="<?php echo MODULES_WEB_ROOT_DIR; ?>bibliography/dl_print.php" id="search" method="get" style="display: inline;"><?php echo __('Search'); ?> :
-    <input type="text" name="keywords" size="30" />
-    <input type="submit" id="doSearch" value="<?php echo __('Search'); ?>" class="button" />
-    </form>
-    <div style="margin-top: 3px;">
-        <?php
-        echo __('Maximum').' <font style="color: #FF0000">'.$max_print.'</font> '.__('records can be printed at once. Currently there is').' '; //mfc
-        if (isset($_SESSION['labels'])) {
-            echo '<font id="queueCount" style="color: #FF0000">'.count($_SESSION['labels']).'</font>';
-        } else { echo '<font id="queueCount" style="color: #FF0000">0</font>'; }
-        echo ' '.__('in queue waiting to be printed.'); //mfc
-        ?>
-    </div>
+<div class="menuBoxInner printIcon"><?php echo __('Labels Printing'); ?>
+- <a target="blindSubmit"
+	href="<?php echo MODULES_WEB_ROOT_DIR; ?>bibliography/dl_print.php?action=print"
+	class="notAJAX headerText2"><?php echo __('Print Labels for Selected Data'); ?></a>
+&nbsp; <a target="blindSubmit"
+	href="<?php echo MODULES_WEB_ROOT_DIR; ?>bibliography/dl_print.php?action=clear"
+	class="notAJAX headerText2" style="color: #FF0000;"><?php echo __('Clear Print Queue'); ?></a>
+<hr />
+<form name="search"
+	action="<?php echo MODULES_WEB_ROOT_DIR; ?>bibliography/dl_print.php"
+	id="search" method="get" style="display: inline;"><?php echo __('Search'); ?>
+: <input type="text" name="keywords" size="30" /> <input type="submit"
+	id="doSearch" value="<?php echo __('Search'); ?>" class="button" /></form>
+<div style="margin-top: 3px;"><?php
+echo __('Maximum').' <font style="color: #FF0000">'.$max_print.'</font> '.__('records can be printed at once. Currently there is').' '; //mfc
+if (isset($_SESSION['labels'])) {
+    echo '<font id="queueCount" style="color: #FF0000">'.count($_SESSION['labels']).'</font>';
+} else { echo '<font id="queueCount" style="color: #FF0000">0</font>'; }
+echo ' '.__('in queue waiting to be printed.'); //mfc
+?></div>
 </div>
 </fieldset>
 <?php

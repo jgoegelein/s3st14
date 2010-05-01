@@ -1,4 +1,6 @@
 <?php
+header("location:./");
+exit(); // (JG) we do NOT active this feature
 /**
  * Copyright (C) 2009, WARDIYONO (wynerst@gmail.com)
  *
@@ -19,8 +21,8 @@
  */
 
 $info = 'Library Location';
-$lat= -6.2254549;
-$long= 106.8023901;
+$lat= 50.089506;
+$long= 9.058464;
 
 ?>
 <html>

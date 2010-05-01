@@ -30,7 +30,7 @@ if (isset($_POST['inputSearchVal'])) {
 }
 // query to database
 $member_q = $dbs->query("SELECT member_id, member_name
-    FROM member WHERE member_id LIKE '%$searchVal%' OR member_name LIKE '%$searchVal%' LIMIT 5");
+    FROM member WHERE member_id LIKE '%$searchVal%' OR member_name LIKE '%$searchVal%'"); //LIMIT 9
 if ($member_q->num_rows < 1) {
     exit('NO DATA FOUND');
 }

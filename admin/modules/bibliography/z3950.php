@@ -242,6 +242,7 @@ if (isset($_GET['keywords']) AND $can_read) {
         switch ($_GET['field']) {
             case 'ti' :
                 $query = '@or @and @attr 1=4 '.$keywords.' @and @attr 1=5 '.$keywords;
+                // $query = '@or @and @attr 5=100 @attr 1=4 '.$keywords.' @and @attr 5=100 @attr 1=5 '.$keywords;
             break;
             case 'au' :
                 $query = '@attr 1=1 @and '.$keywords;

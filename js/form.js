@@ -176,7 +176,7 @@ var showDropDown = function(strURL, strElmntID, strAddParams) {
     var inputObjXY = inputObj.positionedOffset();
     // List ID
     var listObj = $(strElmntID + 'List');
-    if (inputVal.length < 4) { listObj.hide(); return; }
+    if (inputVal.length < 2) { listObj.hide(); return; }
     // populate list ID
     jsonToList(strURL, strElmntID, 'inputSearchVal=' + escape(inputVal) + '&' + strAddParams);
     if (noResult) { return; }

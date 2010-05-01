@@ -123,6 +123,14 @@ if (isset($_POST['updateData'])) {
     // barcode encoding
     $dbs->query('UPDATE setting SET setting_value=\''.$dbs->escape_string(serialize($_POST['barcode_encoding'])).'\' WHERE setting_name=\'barcode_encoding\'');
 
+    // enable_overdue_warning
+    $setting_value = $_POST['enable_overdue_warning'] == '1'?true:false;
+    $dbs->query('UPDATE setting SET setting_value=\''.$dbs->escape_string(serialize($setting_value)).'\' WHERE setting_name=\'enable_overdue_warning\'');
+
+    // enable_confirmation_popup
+    $setting_value = $_POST['enable_confirmation_popup'] == '1'?true:false;
+    $dbs->query('UPDATE setting SET setting_value=\''.$dbs->escape_string(serialize($setting_value)).'\' WHERE setting_name=\'enable_confirmation_popup\'');
+
     // write log
     utility::writeLogs($dbs, 'staff', $_SESSION['uid'], 'system', $_SESSION['realname'].' change application global configuration');
     utility::jsAlert(__('Settings saved. Refreshing page'));
@@ -241,6 +249,18 @@ $form->addTextField('text', 'session_timeout', __('Session Login Timeout'), $sys
 
 // barcode encoding
 $form->addSelectList('barcode_encoding', __('Barcode Encoding'), $barcodes_encoding, $sysconf['barcode_encoding'] );
+
+// enable_confirmation_popup
+$options = null;
+$options[] = array('0', __('Disable'));
+$options[] = array('1', __('Enable'));
+$form->addSelectList('enable_confirmation_popup', __('Confirmation Popups'), $options, $sysconf['enable_confirmation_popup']?'1':'0');
+
+// enable_overdue_warning
+$options = null;
+$options[] = array('0', __('Disable'));
+$options[] = array('1', __('Enable'));
+$form->addSelectList('enable_overdue_warning', __('Overdue Warning'), $options, $sysconf['enable_overdue_warning']?'1':'0');
 
 // print out the object
 echo $form->printOut();

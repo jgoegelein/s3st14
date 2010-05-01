@@ -1,6 +1,7 @@
 <?php
 /**
  * Copyright (C) 2007,2008  Arie Nugraha (dicarve@yahoo.com)
+ *               2010 Juergen Goegelein (JGoegelein@googlemail.com)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +34,7 @@ $can_read = utility::havePrivilege('membership', 'r');
 $can_write = utility::havePrivilege('membership', 'w');
 
 if (!$can_read) {
-    die('<div class="errorBox">'.__('You don\'t have enough privileges to access this area!').'</div>');
+    die('<div class="errorBox">'.__('You are not authorized to view this section').'</div>');
 }
 
 if (isset($_POST['doExport'])) {
@@ -45,6 +46,7 @@ if (isset($_POST['doExport'])) {
         // set PHP time limit
         set_time_limit(3600);
         // limit
+        $file_characterset = trim($_POST['fileCharacterset']);
         $sep = trim($_POST['fieldSep']);
         $encloser = trim($_POST['fieldEnc']);
         $limit = intval($_POST['recordNum']);
@@ -78,23 +80,29 @@ if (isset($_POST['doExport'])) {
         // die($sql);
         $all_data_q = $dbs->query($sql);
         if ($dbs->error) {
-            utility::jsAlert(__('Error on query to database, Export FAILED!'));
+            utility::jsAlert(__('Error on query to database, Export FAILED!'.$dbs->error));
         } else {
             if ($all_data_q->num_rows > 0) {
                 header('Content-type: text/plain');
-                header('Content-Disposition: attachment; filename="senayan_member_export.csv"');
+                $file_name ='senayan_member_export_'.date("c");
+                $file_name .= ($file_characterset == 'UTF-8')?'-utf8':'';
+                $file_name .= '.csv';
+                header('Content-Disposition: attachment; filename="'.$file_name.'"');
+                // add heading line
+                $buffer = '"member_id"'.$sep.'"member_name"'.$sep.'"gender"'.$sep.'"mt.member_type_name"'.$sep.'"member_email"'.$sep.'"member_address"'.$sep.'"postal_code"'.$sep.'"inst_name"'.$sep.'"is_new"'.$sep.'"member_image"'.$sep.'"pin"'.$sep.'"member_phone"'.$sep.'"member_fax"'.$sep.'"member_since_date"'.$sep.'"register_date"'.$sep.'"expire_date"'.$sep.'"member_notes"';
+                echo $buffer;
+                echo $rec_sep;
                 while ($member_data = $all_data_q->fetch_assoc()) {
                     $buffer = null;
-                    foreach ($member_data as $fld_data) {
-                        $fld_data = $dbs->escape_string($fld_data);
+                    foreach ($member_data as $idx => $fld_d) {
                         // data
-                        $buffer .=  $encloser.$fld_data.$encloser;
+                        $buffer .=  (!empty ($fld_d) & ($fld_d <> "NULL"))?stripslashes($encloser.$fld_d.$encloser):'';
                         // field separator
                         $buffer .= $sep;
                     }
                     // remove the last field separator
-                    $buffer = substr_replace($buffer, '', -1);
-                    echo $buffer;
+                    $buffer = substr_replace($buffer, '', 0-strlen($sep));
+                    echo (strtoupper($file_characterset) == 'ISO-8859-1')?utf8_decode($buffer):$buffer;
                     echo $rec_sep;
                 }
                 exit();
@@ -105,17 +113,16 @@ if (isset($_POST['doExport'])) {
     }
     exit();
 }
-
 ?>
 <fieldset class="menuBox">
-<div class="menuBoxInner exportIcon">
-    <?php echo strtoupper(__('Export Data')).'<hr />'.__('Export member(s) data to CSV file'); ?>
-</div>
+<div class="menuBoxInner exportIcon"><?php echo __('EXPORT TOOL'); ?>
+<hr />
+<?php echo __('Export membership data to CSV file'); ?></div>
 </fieldset>
 <?php
 
 // create new instance
-$form = new simbio_form_table_AJAX('mainForm', $_SERVER['PHP_SELF'].'', 'post');
+$form = new simbio_form_table_AJAX('mainForm', $_SERVER['PHP_SELF'], 'post');
 $form->submit_button_attr = 'name="doExport" value="'.__('Export Now').'" class="button"';
 
 // form table attributes
@@ -124,10 +131,15 @@ $form->table_header_attr = 'class="alterCell" style="font-weight: bold;"';
 $form->table_content_attr = 'class="alterCell2"';
 
 /* Form Element(s) */
+// fileCharacterset
+$characterset_options[] = array('ISO-8859-1', 'Latin-1');
+$characterset_options[] = array('ISO-8859-1', 'ISO-8859-1');
+$characterset_options[] = array('UTF-8', 'UTF-8');
+$form->addSelectList('fileCharacterset', __('File Encoding'), $characterset_options);
 // field separator
-$form->addTextField('text', 'fieldSep', __('Field Separator').'*', ''.htmlentities(',').'', 'style="width: 10%;"');
+$form->addTextField('text', 'fieldSep', __('Field Separator').'*', ''.htmlentities(',').'', 'style="width: 10%;" maxlength="3"');
 //  field enclosed
-$form->addTextField('text', 'fieldEnc', __('Field Enclosed With'), ''.htmlentities('"').'', 'style="width: 10%;"');
+$form->addTextField('text', 'fieldEnc', __('Field Enclosed With').'*', ''.htmlentities('"').'', 'style="width: 10%;"');
 // record separator
 $rec_sep_options[] = array('NEWLINE', 'NEWLINE');
 $rec_sep_options[] = array('RETURN', 'CARRIAGE RETURN');

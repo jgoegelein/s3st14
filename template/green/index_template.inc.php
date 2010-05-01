@@ -101,6 +101,14 @@
         </p>
     <!-- license end -->
 
+                    <!-- imprint -->
+                    <div class="heading"><?php echo __('Imprint'); ?></div>
+                       <a class="menu" href="index.php?p=imprint_de"><?php echo __('Imprint'); ?></a>
+                   <p>
+                        This Software is Released Under <a href="http://www.gnu.org/copyleft/gpl.html" title="GNU GPL License" target="_blank">GNU GPL License</a>
+                        Version 3.
+                    </p>
+                    <!-- imprint end -->
     <!-- award -->
         <div class="heading">Award</div>
         <p align="center">

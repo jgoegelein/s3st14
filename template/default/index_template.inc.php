@@ -6,7 +6,10 @@
         If you modify this template for your own need, just add 
         "This template has been modified by your_name_here"
 -->
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr"><head><title><?php echo $page_title; ?></title><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
+<head>
+<title><?php echo $page_title; ?></title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <link rel="icon" href="webicon.ico" type="image/x-icon" />
 <link rel="shortcut icon" href="webicon.ico" type="image/x-icon" />
 <link href="template/core.style.css" rel="stylesheet" type="text/css" />
@@ -26,7 +29,7 @@
         <li><a class="menu" href="index.php"><?php echo __('Home'); ?></a></li>
         <li><a class="menu" href="index.php?p=libinfo"><?php echo __('Library Information'); ?></a></li>
         <li><a class="menu" href="index.php?p=help"><?php echo __('Help on Search'); ?></a></li>
-        <li><a class="menu" href="index.php?p=member"><?php echo __('Member Area'); ?></a></li>
+        <!--li><a class="menu" href="index.php?p=member"><?php echo __('Member Area'); ?></a></li-->
         <li><a class="menu" href="index.php?p=login"><?php echo __('Librarian LOGIN'); ?></a></li>
 </ul>
 </td>
@@ -48,12 +51,12 @@
 <!-- sidepan -->
 <td id="sidepan" valign="top">
     <!-- language selection -->
-        <div class="heading"><?php echo __('Select Language'); ?></div>
+        <!--div class="heading"><?php echo __('Select Language'); ?></div>
         <form name="langSelect" action="index.php" method="get">
         <select name="select_lang" style="width: 99%;" onchange="document.langSelect.submit();">
         <?php echo $language_select; ?>
         </select>
-        </form>
+        </form-->
     <!-- language selection end -->
 
     <!-- simple search -->
@@ -94,32 +97,40 @@
     <!-- advanced search end -->
 
     <!-- license -->
-        <div class="heading">License</div>
+        <!--div class="heading">License</div>
         <p>
         This Software is Released Under <a href="http://www.gnu.org/copyleft/gpl.html" title="GNU GPL License" target="_blank">GNU GPL License</a>
         Version 3.
-        </p>
+        </p-->
     <!-- license end -->
 
+                    <!-- imprint -->
+                    <div class="heading"><?php echo __('Imprint'); ?></div>
+                       <a class="menu" href="index.php?p=imprint_de"><?php echo __('Imprint'); ?></a>
+                   <p>
+                        This Software is Released Under <a href="http://www.gnu.org/copyleft/gpl.html" title="GNU GPL License" target="_blank">GNU GPL License</a>
+                        Version 3.
+                    </p>
+                    <!-- imprint end -->
     <!-- award -->
-        <div class="heading">Award</div>
+        <!--div class="heading">Award</div>
         <p align="center">
         The Winner in the Category of OSS
         <img src="template/default/media/logo-inaicta.png"
             alt="Indonesia ICT Award 2009" border="0" />
         <br />
-        </p>
+        </p-->
     <!-- award -->
 
     <!-- w3c validate -->
-        <div class="heading">Validated</div>
+        <!--div class="heading">Validated</div>
         <p align="center">
         <a href="http://validator.w3.org/check?uri=referer"><img
             src="template/valid-xhtml10.png"
             alt="Valid XHTML 1.0 Transitional" border="0" /></a>
         <br />
         <img src="template/valid-css.png" alt="Valid CSS" />
-        </p>
+        </p-->
     <!-- w3c validate end -->
 </td>
 <!-- main menu end -->

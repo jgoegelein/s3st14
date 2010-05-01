@@ -35,6 +35,8 @@
 
  */
 
+require '../../sysconfig.inc.php';
+
 /* MODIFIED BY : Arie Nugraha */
 define('GD_NOT_LOADED', 1);
 define('ENCODING_UNHANDLED', 2);
@@ -175,13 +177,13 @@ function barcode_outimage($text, $bars, $scale = 1, $mode = "png", $total_y = 0,
     /* output the image */
     if ($mode == 'jpg' || $mode == 'jpeg'){
         header('Content-Type: image/jpeg');
-        @imagejpeg($im, '../../images/barcodes/'.$barcode_text.'.jpg');
+        @imagejpeg($im, IMAGES_BASE_DIR.'barcodes/'.$barcode_text.'.jpg');
     } else if ($mode == 'gif'){
         header('Content-Type: image/gif');
-        @imagegif($im, '../../images/barcodes/'.$barcode_text.'.gif');
+        @imagegif($im, IMAGES_BASE_DIR.'barcodes/'.$barcode_text.'.gif');
     } else {
         header('Content-Type: image/png');
-        @imagepng($im, '../../images/barcodes/'.$barcode_text.'.png');
+        @imagepng($im, IMAGES_BASE_DIR.'barcodes/'.$barcode_text.'.png');
     }
 }
 

@@ -21,25 +21,26 @@
  *
  */
 
-class utility
-{
+class utility {
     /**
      * Static Method to send out javascript alert
      *
      * @param   string  $str_message
      * @return  void
      */
-    public static function jsAlert($str_message)
-    {
-        if (!$str_message) {
-            return;
-        }
+    public static function jsAlert($str_message) {
+        global $sysconf;
+        if ($sysconf['enable_confirmation_popup']) {
+            if (!$str_message) {
+                return;
+            }
 
-        // replace newline with javascripts newline
-        $str_message = str_replace("\n", '\n', $str_message);
-        echo '<script type="text/javascript">'."\n";
-        echo 'alert("'.addslashes($str_message).'")'."\n";
-        echo '</script>'."\n";
+            // replace newline with javascripts newline
+            $str_message = str_replace("\n", '\n', $str_message);
+            echo '<script type="text/javascript">'."\n";
+            echo 'alert("'.addslashes($str_message).'")'."\n";
+            echo '</script>'."\n";
+        }
     }
 
 
@@ -49,8 +50,7 @@ class utility
      * @param   object  $obj_db
      * @return  void
      */
-    public static function loadSettings($obj_db)
-    {
+    public static function loadSettings($obj_db) {
         global $sysconf;
         $_setting_query = $obj_db->query('SELECT * FROM setting');
         if (!$obj_db->errno) {
@@ -75,8 +75,7 @@ class utility
      * @param   string  $str_privilege_type
      * @return  boolean
      */
-    public static function havePrivilege($str_module_name, $str_privilege_type = 'r')
-    {
+    public static function havePrivilege($str_module_name, $str_privilege_type = 'r') {
         // checking checksum
         $_checksum = defined('UCS_BASE_DIR')?md5($_SERVER['SERVER_ADDR'].UCS_BASE_DIR.'admin'):md5($_SERVER['SERVER_ADDR'].SENAYAN_BASE_DIR.'admin');
         if ($_SESSION['checksum'] != $_checksum) {
@@ -103,8 +102,7 @@ class utility
      * @param   string  $str_log_msg
      * @return  void
      */
-    public static function writeLogs($obj_db, $str_log_type, $str_value_id, $str_location, $str_log_msg)
-    {
+    public static function writeLogs($obj_db, $str_log_type, $str_value_id, $str_location, $str_log_msg) {
         if (!$obj_db->error) {
             // log table
             $_log_date = date('Y-m-d H:i:s');
@@ -132,8 +130,7 @@ class utility
      * @param   array   $arr_cache
      * @return  mixed
      */
-    public static function getID($obj_db, $str_table_name, $str_id_field, $str_value_field, $str_value, &$arr_cache = false)
-    {
+    public static function getID($obj_db, $str_table_name, $str_id_field, $str_value_field, $str_value, &$arr_cache = false) {
         $str_value = trim($str_value);
         if ($arr_cache) {
             if (isset($arr_cache[$str_value])) {
@@ -174,8 +171,7 @@ class utility
      * @return  boolean
      * this script is taken from http://mobiforge.com/developing/story/lightweight-device-detection-php
      **/
-    public static function isMobileBrowser()
-    {
+    public static function isMobileBrowser() {
         $_is_mobile_browser = '0';
 
         if(preg_match('/(up.browser|up.link|mmp|symbian|smartphone|midp|wap|phone)/i', strtolower(@$_SERVER['HTTP_USER_AGENT']))) {
@@ -242,8 +238,7 @@ class utility
      *
      * @return  boolean
      **/
-    public static function isMemberLogin()
-    {
+    public static function isMemberLogin() {
         $_logged_in = false;
         $_logged_in = isset($_SESSION['mid']) && isset($_SESSION['m_name']) && isset($_SESSION['m_email']);
         return $_logged_in;

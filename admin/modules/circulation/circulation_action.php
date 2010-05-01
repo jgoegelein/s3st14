@@ -42,15 +42,13 @@ if (isset($_POST['finish'])) {
     if ($flush == TRANS_FLUSH_ERROR) {
         // write log
         utility::writeLogs($dbs, 'member', $memberID, 'circulation', 'ERROR : '.$_SESSION['realname'].' FAILED finish circulation transaction with member ('.$memberID.')');
-        echo '<script type="text/javascript">';
-        echo 'alert(\''.__('ERROR! Loan data can\'t be saved to database').'\');';
-        echo '</script>';
+        utility::jsAlert(__('ERROR! Loan data can\'t be saved to database'));
     } else {
         // write log
         utility::writeLogs($dbs, 'member', $memberID, 'circulation', $_SESSION['realname'].' finish circulation transaction with member ('.$memberID.')');
-        // send message
+        utility::jsAlert(__('Transaction finished'));
+
         echo '<script type="text/javascript">';
-        echo 'alert(\''.__('Transaction finished').'\');';
         // print receipt only if enabled and $_SESSION['receipt_record'] not empty
         if ($sysconf['circulation_receipt'] && $_SESSION['receipt_record']) {
             // open receipt windows
@@ -434,7 +432,9 @@ if (isset($_POST['memberID']) OR isset($_SESSION['memberID'])) {
         echo '<tr>'."\n";
         echo '<td class="dataListHeader" colspan="5">';
         // hidden form for transaction finish
-        echo '<form id="finishForm" method="post" target="blindSubmit" action="'.MODULES_WEB_ROOT_DIR.'circulation/circulation_action.php" style="display: inline;"><input type="button" value="'.__('Finish Transaction').'" onclick="confSubmit(\'finishForm\', \''.__('Are you sure want to finish current transaction?').'\')" /><input type="hidden" name="finish" value="true" /></form>';
+     // echo '<form id="finishForm" method="post" target="blindSubmit" action="'.MODULES_WEB_ROOT_DIR.'circulation/circulation_action.php" style="display: inline;"><input type="button" value="'.__('Finish Transaction').'" onclick="confSubmit(\'finishForm\', \''.__('Are you sure want to finish current transaction?').'\')" /><input type="hidden" name="finish" value="true" /></form>';
+     // do not ask for confirmation, simply do it !
+        echo '<form id="finishForm" method="post" target="blindSubmit" action="'.MODULES_WEB_ROOT_DIR.'circulation/circulation_action.php" style="display: inline;"><input type="button" value="'.__('Finish Transaction').'" onclick="submit()" /><input type="hidden" name="finish" value="true" /></form>';
         echo '</td>';
         echo '</tr>'."\n";
         echo '<tr>'."\n";
@@ -444,7 +444,7 @@ if (isset($_POST['memberID']) OR isset($_SESSION['memberID'])) {
         if ($member->member_image) {
             if (file_exists(IMAGES_BASE_DIR.'persons/'.$member->member_image)) {
                 echo '<td class="alterCell2" valign="top" rowspan="3">';
-                echo '<img src="'.SENAYAN_WEB_ROOT_DIR.'lib/phpthumb/phpThumb.php?src=../../images/persons/'.urlencode($member->member_image).'&w=90" style="border: 1px solid #999999" />';
+                echo '<img src="'.SENAYAN_WEB_ROOT_DIR.'lib/phpthumb/phpThumb.php?src='.IMAGES_BASE_DIR.'persons/'.urlencode($member->member_image).'&w=53" style="border: 1px solid #999999" />';
                 echo '</td>';
             }
         }

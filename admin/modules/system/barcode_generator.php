@@ -37,7 +37,7 @@ if (!$can_read) {
     die('<div class="errorBox">'.__('You don\'t have enough privileges to view this section').'</div>');
 }
 
-$max_print = 50;
+$max_print = 40;
 
 // barcode pdf download
 if (isset($_SESSION['barcodes'])) {
@@ -95,7 +95,7 @@ if (isset($_POST['saveData']) AND $can_write) {
         foreach ($_POST['barcode'] as $barcode_text) {
             if (!empty($barcode_text)) {
                 $barcode_text = trim($barcode_text);
-                echo 'new Ajax.Request(\''.SENAYAN_WEB_ROOT_DIR.'lib/phpbarcode/barcode.php?code='.$barcode_text.'&encoding='.$sysconf['barcode_encoding'].'&scale='.$size.'&mode=png\', { method: \'get\', onFailure: function(sendAlert) { alert(\''.__('Error creating barcode!').'\'); } });'."\n";
+                echo 'new Ajax.Request(\''.SENAYAN_WEB_ROOT_DIR.'lib/phpbarcode/barcode.php?code='.$barcode_text.'&encoding='.$sysconf['barcode_encoding'][0].'&scale='.$size.'&mode=png\', { method: \'get\', onFailure: function(sendAlert) { alert(\''.__('Error creating barcode!').'\'); } });'."\n";
                 // add to sessions
                 $_SESSION['barcodes'][] = $barcode_text;
             }
@@ -121,19 +121,20 @@ $table->table_attr = 'align="center" class="border fullWidth" cellpadding="5" ce
 
 // initial row count
 $row = 1;
-$row_num = 6;
+$row_num = 11;
 
 // submit button
 $table->appendTableRow(array(__('Barcode Size').' : <select name="size"><option value="1">'.__('Small').'</option>
     <option value="2" selected>'.__('Medium').'</option>
     <option value="3">'.__('Big').'</option></select>'));
 // set cell attribute
-$table->setCellAttr($row, 0, 'colspan="3" class="alterCell"');
+$table->setCellAttr($row, 0, 'colspan="4" class="alterCell"');
 $row++;
 
 // barcode text fields
 while ($row <= $row_num) {
     $table->appendTableRow(array('<input type="text" name="barcode[]" style="width: 100%;" />',
+        '<input type="text" name="barcode[]" style="width: 100%;" />',
         '<input type="text" name="barcode[]" style="width: 100%;" />',
         '<input type="text" name="barcode[]" style="width: 100%;" />'));
     $row++;
@@ -142,7 +143,7 @@ while ($row <= $row_num) {
 // submit button
 $table->appendTableRow(array('<input type="submit" name="saveData" value="'.__('Generate Barcodes').'" />'));
 // set cell attribute
-$table->setCellAttr($row_num+1, 0, 'colspan="3" class="alterCell"');
+$table->setCellAttr($row_num+1, 0, 'colspan="4" class="alterCell"');
 
 echo '<form name="barcodeForm" id="barcodeForm" target="submitExec" method="post" action="'.$_SERVER['PHP_SELF'].'">';
 echo $table->printTable();

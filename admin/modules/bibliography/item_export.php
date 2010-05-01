@@ -1,6 +1,7 @@
 <?php
 /**
  * Copyright (C) 2007,2008  Arie Nugraha (dicarve@yahoo.com)
+ *               2010 Juergen Goegelein (JGoegelein@googlemail.com)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,13 +44,12 @@ if (isset($_POST['doExport'])) {
         utility::jsAlert(__('Required fields (*)  must be filled correctly!'));
         exit();
     } else {
-        // set PHP time limit
+    // set PHP time limit
         set_time_limit(0);
 
         // create local function to fetch values
-        function getValues($obj_db, $str_query)
-        {
-            // make query from database
+        function getValues($obj_db, $str_query) {
+        // make query from database
             $_value_q = $obj_db->query($str_query);
             if ($_value_q->num_rows > 0) {
                 $_value_buffer = '';
@@ -64,6 +64,7 @@ if (isset($_POST['doExport'])) {
         }
 
         // limit
+        $file_characterset = trim($_POST['fileCharacterset']);
         $sep = trim($_POST['fieldSep']);
         $encloser = trim($_POST['fieldEnc']);
         $limit = intval($_POST['recordNum']);
@@ -71,24 +72,24 @@ if (isset($_POST['doExport'])) {
         if ($_POST['recordSep'] === 'NEWLINE') {
             $rec_sep = "\n";
         } else if ($_POST['recordSep'] === 'RETURN') {
-            $rec_sep = "\r";
-        } else {
-            $rec_sep = trim($_POST['recordSep']);
-        }
+                $rec_sep = "\r";
+            } else {
+                $rec_sep = trim($_POST['recordSep']);
+            }
+
+        // decide on the date format
+
         // fetch all data from item table
         $sql = "SELECT
-            i.item_code, i.call_number, ct.coll_type_name,
-            i.inventory_code, i.received_date, spl.supplier_name,
-            i.order_no, loc.location_name,
-            i.order_date, st.item_status_name, i.site,
-            i.source, i.invoice, i.price, i.price_currency, i.invoice_date,
-            i.input_date, i.last_update, b.title
+            i.item_id,         i.item_code, i.call_number,     ct.coll_type_name,   i.inventory_code,
+            spl.supplier_name, i.order_no,  loc.location_name, st.item_status_name, i.site,
+            i.source,          i.invoice,   i.price,           i.price_currency,    b.title
             FROM item AS i
-            LEFT JOIN biblio AS b ON i.biblio_id=b.biblio_id
-            LEFT JOIN mst_coll_type AS ct ON i.coll_type_id=ct.coll_type_id
-            LEFT JOIN mst_supplier AS spl ON i.supplier_id=spl.supplier_id
-            LEFT JOIN mst_item_status AS st ON i.item_status_id=st.item_status_id
-            LEFT JOIN mst_location AS loc ON i.location_id=loc.location_id ";
+            LEFT JOIN biblio          AS  b ON i.biblio_id       = b.biblio_id
+            LEFT JOIN mst_coll_type   AS  ct ON i.coll_type_id   = ct.coll_type_id
+            LEFT JOIN mst_supplier    AS spl ON i.supplier_id    = spl.supplier_id
+            LEFT JOIN mst_item_status AS  st ON i.item_status_id = st.item_status_id
+            LEFT JOIN mst_location    AS loc ON i.location_id    = loc.location_id";
         if ($limit > 0) { $sql .= ' LIMIT '.$limit; }
         if ($offset > 1) {
             if ($limit > 0) {
@@ -105,17 +106,27 @@ if (isset($_POST['doExport'])) {
         } else {
             if ($all_data_q->num_rows > 0) {
                 header('Content-type: text/plain');
-                header('Content-Disposition: attachment; filename="senayan_item_export.csv"');
+                $file_name ='senayan_item_export_'.date("c");
+                $file_name .= ($file_characterset == 'UTF-8')?'-utf8':'';
+                $file_name .= '.csv';
+                header('Content-Disposition: attachment; filename="'.$file_name.'"');
+                // add heading line
+                $buffer  = '"i.item_id","i.item_code","i.call_number","ct.coll_type_name","i.inventory_code"';
+                $buffer .= ',"spl.supplier_name","i.order_no","loc.location_name","st.item_status_name","i.site"';
+                $buffer .= ',"i.source","i.invoice","i.price","i.price_currency","b.title"';
+                echo $buffer;
+                echo $rec_sep;
                 while ($item_d = $all_data_q->fetch_row()) {
                     $buffer = null;
                     foreach ($item_d as $idx => $fld_d) {
-                        $fld_d = $dbs->escape_string($fld_d);
                         // data
-                        $buffer .=  stripslashes($encloser.$fld_d.$encloser);
+                        $buffer .=  (!empty ($fld_d) & ($fld_d <> "NULL"))?stripslashes($encloser.$fld_d.$encloser):'';
                         // field separator
                         $buffer .= $sep;
                     }
-                    echo substr_replace($buffer, '', -1);
+                    // remove the last field separator
+                    $buffer = substr_replace($buffer, '', 0-strlen($sep));
+                    echo (strtoupper($file_characterset) == 'ISO-8859-1')?utf8_decode($buffer):$buffer;
                     echo $rec_sep;
                 }
                 exit();
@@ -131,7 +142,7 @@ if (isset($_POST['doExport'])) {
 <div class="menuBoxInner exportIcon">
     <?php echo __('ITEM EXPORT TOOL'); ?>
     <hr />
-    <?php echo __('Export item data to CSV file'); ?>
+<?php echo __('Export item data to CSV file'); ?>
 </div>
 </fieldset>
 <?php
@@ -146,6 +157,11 @@ $form->table_header_attr = 'class="alterCell" style="font-weight: bold;"';
 $form->table_content_attr = 'class="alterCell2"';
 
 /* Form Element(s) */
+// fileCharacterset
+$characterset_options[] = array('ISO-8859-1', 'Latin-1');
+$characterset_options[] = array('ISO-8859-1', 'ISO-8859-1');
+$characterset_options[] = array('UTF-8', 'UTF-8');
+$form->addSelectList('fileCharacterset', __('File Encoding'), $characterset_options);
 // field separator
 $form->addTextField('text', 'fieldSep', __('Field Separator').'*', ''.htmlentities(',').'', 'style="width: 10%;" maxlength="3"');
 //  field enclosed

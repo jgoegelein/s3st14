@@ -148,10 +148,6 @@ if (isset($_POST['saveData']) AND $can_read AND $can_write) {
             // send an alert
             if ($update) {
                 utility::jsAlert(__('Bibliography Data Successfully Updated'));
-                // auto insert catalog to UCS if enabled
-                if ($sysconf['ucs']['enable']) {
-                    echo '<script type="text/javascript">parent.ucsUpload(\''.MODULES_WEB_ROOT_DIR.'bibliography/ucs_upload.php\', \'itemID[]='.$updateRecordID.'\', false);</script>';
-                }
                 // write log
                 utility::writeLogs($dbs, 'staff', $_SESSION['uid'], 'bibliography', $_SESSION['realname'].' update bibliographic data ('.$data['title'].') with biblio_id ('.$_POST['itemID'].')');
                 // close window OR redirect main page
@@ -196,10 +192,6 @@ if (isset($_POST['saveData']) AND $can_read AND $can_write) {
                 $_SESSION['biblioAuthor'] = array();
                 $_SESSION['biblioTopic'] = array();
                 $_SESSION['biblioAttach'] = array();
-                // auto insert catalog to UCS if enabled
-                if ($sysconf['ucs']['enable'] && $sysconf['ucs']['auto_insert']) {
-                    echo '<script type="text/javascript">parent.ucsUpload(\''.MODULES_WEB_ROOT_DIR.'bibliography/ucs_upload.php\', \'itemID[]='.$last_biblio_id.'\');</script>';
-                }
                 echo '<script type="text/javascript">parent.setContent(\'mainContent\', \''.MODULES_WEB_ROOT_DIR.'bibliography/index.php\', \'post\', \'itemID='.$last_biblio_id.'&detail=true\');</script>';
             } else { utility::jsAlert(__('Bibliography Data FAILED to Save. Please Contact System Administrator')."\n".$sql_op->error); }
             exit();
@@ -221,7 +213,6 @@ if (isset($_POST['saveData']) AND $can_read AND $can_write) {
         $_POST['itemID'] = array((integer)$_POST['itemID']);
     }
     // loop array
-    $http_query = '';
     foreach ($_POST['itemID'] as $itemID) {
         $itemID = (integer)$itemID;
         // check if this biblio data still have an item
@@ -239,8 +230,6 @@ if (isset($_POST['saveData']) AND $can_read AND $can_write) {
                 $sql_op->delete('biblio_topic', "biblio_id=$itemID");
                 $sql_op->delete('biblio_author', "biblio_id=$itemID");
                 $sql_op->delete('biblio_attachment', "biblio_id=$itemID");
-                // add to http query for UCS delete
-                $http_query .= "itemID[]=$itemID&";
             }
         } else {
             $still_have_item[] = substr($biblio_item_d[0], 0, 45).'... still have '.$biblio_item_d[1].' copies';
@@ -257,10 +246,6 @@ if (isset($_POST['saveData']) AND $can_read AND $can_write) {
         echo '<script type="text/javascript">parent.setContent(\'mainContent\', \''.$_SERVER['PHP_SELF'].'?'.$_POST['lastQueryStr'].'\', \'post\');</script>';
         exit();
     }
-    // auto delete data on UCS if enabled
-    if ($http_query && $sysconf['ucs']['enable'] && $sysconf['ucs']['auto_delete']) {
-        echo '<script type="text/javascript">parent.ucsUpdate(\''.MODULES_WEB_ROOT_DIR.'bibliography/ucs_update.php\', \'nodeOperation=delete&'.$http_query.'\');</script>';
-    }
     // error alerting
     if ($error_num == 0) {
         utility::jsAlert(__('All Data Successfully Deleted'));
@@ -274,30 +259,34 @@ if (isset($_POST['saveData']) AND $can_read AND $can_write) {
 /* RECORD OPERATION END */
 
 if (!$in_pop_up) {
-/* search form */
-?>
+    /* search form */
+    ?>
 <fieldset class="menuBox">
-<div class="menuBoxInner biblioIcon">
-    <?php echo strtoupper(__('Bibliographic')); ?> - <a href="<?php echo MODULES_WEB_ROOT_DIR; ?>bibliography/index.php?action=detail" class="headerText2"><?php echo __('Add New Bibliography'); ?></a>
-    &nbsp; <a href="<?php echo MODULES_WEB_ROOT_DIR; ?>bibliography/index.php" class="headerText2"><?php echo __('Bibliographic List'); ?></a>
-    <?php
-    // enable UCS?
-    if ($sysconf['ucs']['enable']) {
-    ?>
-    <div class="marginTop"><a href="#" onclick="ucsUpload('<?php echo MODULES_WEB_ROOT_DIR; ?>bibliography/ucs_upload.php', serializeChbox('dataList'))" class="notAJAX ucsUpload"><?php echo __('Upload Selected Bibliographic data to Union Catalog Server*'); ?></a></div>
-    <?php
-    }
-    ?>
-    <hr />
-    <form name="search" action="<?php echo MODULES_WEB_ROOT_DIR; ?>bibliography/index.php" id="search" method="get" style="display: inline;"><?php echo __('Search'); ?> :
-    <input type="text" name="keywords" id="keywords" size="30" />
-    <select name="field"><option value="0"><?php echo __('All Fields'); ?></option><option value="title"><?php echo __('Title/Series Title'); ?> </option><option value="subject"><?php echo __('Topics'); ?></option><option value="author"><?php echo __('Authors'); ?></option><option value="isbn"><?php echo __('ISBN/ISSN'); ?></option><option value="publisher"><?php echo __('Publisher'); ?></option></select>
-    <input type="submit" id="doSearch" value="<?php echo __('Search'); ?>" class="button" />
-    </form>
+<div class="menuBoxInner biblioIcon"><?php echo strtoupper(__('Bibliographic')); ?>
+- <a
+	href="<?php echo MODULES_WEB_ROOT_DIR; ?>bibliography/index.php?action=detail"
+	class="headerText2"><?php echo __('Add New Bibliography'); ?></a>
+&nbsp; <a
+	href="<?php echo MODULES_WEB_ROOT_DIR; ?>bibliography/index.php"
+	class="headerText2"><?php echo __('Bibliographic List'); ?></a> <!--div class="marginTop"><a href="#" onclick="ucsUpload('<?php echo MODULES_WEB_ROOT_DIR; ?>bibliography/ucs_upload.php', serializeChbox('dataList'))" class="notAJAX ucsUpload"><?php echo __('Upload Selected Bibliographic data to Union Catalog Server')."*"; ?></a></div-->
+<hr />
+<form name="search"
+	action="<?php echo MODULES_WEB_ROOT_DIR; ?>bibliography/index.php"
+	id="search" method="get" style="display: inline;"><?php echo __('Search'); ?>
+: <input type="text" name="keywords" id="keywords" size="30" /> <select
+	name="field">
+	<option value="0"><?php echo __('All Fields'); ?></option>
+	<option value="title"><?php echo __('Title/Series Title'); ?></option>
+	<option value="subject"><?php echo __('Topics'); ?></option>
+	<option value="author"><?php echo __('Authors'); ?></option>
+	<option value="isbn"><?php echo __('ISBN/ISSN'); ?></option>
+	<option value="publisher"><?php echo __('Publisher'); ?></option>
+</select> <input type="submit" id="doSearch"
+	value="<?php echo __('Search'); ?>" class="button" /></form>
 </div>
 </fieldset>
-<?php
-/* search form end */
+    <?php
+    /* search form end */
 }
 /* main content */
 if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'detail')) {
@@ -343,8 +332,21 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
     }
 
     /* Form Element(s) */
+
+    // biblio gmd
+    // get gmd data related to this record from database
+    $gmd_q = $dbs->query('SELECT gmd_id, gmd_name FROM mst_gmd');
+    $gmd_options = array();
+    while ($gmd_d = $gmd_q->fetch_row()) {
+        $gmd_options[] = array($gmd_d[0], $gmd_d[1]);
+    }
+    $form->addSelectList('gmdID', __('GMD'), $gmd_options, $rec_d['gmd_id']);
+
+    // biblio ISBN/ISSN
+    $form->addTextField('text', 'isbn_issn', __('ISBN/ISSN'), $rec_d['isbn_issn'], 'style="width: 40%;"');
     // biblio title
     $form->addTextField('textarea', 'title', __('Title').'*', $rec_d['title'], 'rows="1" style="width: 100%; overflow: auto;"');
+
     // biblio edition
     $form->addTextField('text', 'edition', __('Edition'), $rec_d['edition'], 'style="width: 40%;"');
     // biblio specific detail info/area
@@ -356,58 +358,54 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
         $form->addAnything('Item(s) Data', $str_input);
     }
     // biblio authors
-        $str_input = '<div class="'.$visibility.'"><a class="notAJAX" href="javascript: openWin(\''.MODULES_WEB_ROOT_DIR.'bibliography/pop_author.php?biblioID='.$rec_d['biblio_id'].'\', \'popAuthor\', 500, 200, true)">'.__('Add Author(s)').'</a></div>';
-        $str_input .= '<iframe name="authorIframe" id="authorIframe" class="borderAll" style="width: 100%; height: 70px;" src="'.MODULES_WEB_ROOT_DIR.'bibliography/iframe_author.php?biblioID='.$rec_d['biblio_id'].'&block=1"></iframe>';
+    $str_input = '<div class="'.$visibility.'"><a class="notAJAX" href="javascript: openWin(\''.MODULES_WEB_ROOT_DIR.'bibliography/pop_author.php?biblioID='.$rec_d['biblio_id'].'\', \'popAuthor\', 500, 200, true)">'.__('Add Author(s)').'</a></div>';
+    $str_input .= '<iframe name="authorIframe" id="authorIframe" class="borderAll" style="width: 100%; height: 70px;" src="'.MODULES_WEB_ROOT_DIR.'bibliography/iframe_author.php?biblioID='.$rec_d['biblio_id'].'&block=1"></iframe>';
     $form->addAnything(__('Author(s)'), $str_input);
-    // biblio gmd
-        // get gmd data related to this record from database
-        $gmd_q = $dbs->query('SELECT gmd_id, gmd_name FROM mst_gmd');
-        $gmd_options = array();
-        while ($gmd_d = $gmd_q->fetch_row()) {
-            $gmd_options[] = array($gmd_d[0], $gmd_d[1]);
-        }
-    $form->addSelectList('gmdID', __('GMD'), $gmd_options, $rec_d['gmd_id']);
+
     // biblio publish frequencies
-        // get frequency data related to this record from database
-        $freq_q = $dbs->query('SELECT frequency_id, frequency FROM mst_frequency');
-        $freq_options[] = array('0', strtoupper(__('Not Applicable')));
-        while ($freq_d = $freq_q->fetch_row()) {
-            $freq_options[] = array($freq_d[0], $freq_d[1]);
-        }
-        $str_input = simbio_form_element::selectList('frequencyID', $freq_options, $rec_d['frequency_id']);
-        $str_input .= '&nbsp;';
-        $str_input .= ' '.__('Use this for Serial publication');
+    // get frequency data related to this record from database
+    $freq_q = $dbs->query('SELECT frequency_id, frequency FROM mst_frequency');
+    $freq_options[] = array('0', strtoupper(__('Not Applicable')));
+    while ($freq_d = $freq_q->fetch_row()) {
+        $freq_options[] = array($freq_d[0], $freq_d[1]);
+    }
+    $str_input = simbio_form_element::selectList('frequencyID', $freq_options, $rec_d['frequency_id']);
+    $str_input .= '&nbsp;';
+    $str_input .= ' '.__('Use this for Serial publication');
     $form->addAnything(__('Frequency'), $str_input);
-    // biblio ISBN/ISSN
-    $form->addTextField('text', 'isbn_issn', __('ISBN/ISSN'), $rec_d['isbn_issn'], 'style="width: 40%;"');
     // biblio classification
     $form->addTextField('text', 'class', __('Classification'), $rec_d['classification'], 'style="width: 40%;"');
+
+
     // biblio publisher
-        // AJAX expression
-        $ajax_exp = "ajaxFillSelect('".SENAYAN_WEB_ROOT_DIR."admin/AJAX_lookup_handler.php', 'mst_publisher', 'publisher_id:publisher_name', 'publisherID', $('publ_search_str').getValue())";
-        if ($rec_d['publisher_name']) {
-            $publ_options[] = array($rec_d['publisher_id'], $rec_d['publisher_name']);
-        }
-        $publ_options[] = array('0', __('Publisher'));
-        // string element
-        $str_input = simbio_form_element::selectList('publisherID', $publ_options, '', 'style="width: 50%;"');
-        $str_input .= '&nbsp;';
-        $str_input .= simbio_form_element::textField('text', 'publ_search_str', $rec_d['publisher_name'], 'style="width: 45%;" onkeyup="'.$ajax_exp.'"');
+    // AJAX expression
+    $ajax_exp = "ajaxFillSelect('".SENAYAN_WEB_ROOT_DIR."admin/AJAX_lookup_handler.php', 'mst_publisher', 'publisher_id:publisher_name', 'publisherID', $('publ_search_str').getValue())";
+    if ($rec_d['publisher_name']) {
+        $publ_options[] = array($rec_d['publisher_id'], $rec_d['publisher_name']);
+    }
+    $publ_options[] = array('0', __('Publisher'));
+    // string element
+    $str_input = simbio_form_element::selectList('publisherID', $publ_options, '', 'style="width: 50%;"');
+    $str_input .= '&nbsp;';
+    $str_input .= simbio_form_element::textField('text', 'publ_search_str', $rec_d['publisher_name'], 'style="width: 45%;" onkeyup="'.$ajax_exp.'"');
     $form->addAnything(__('Publisher'), $str_input);
+
     // biblio publish year
     $form->addTextField('text', 'year', __('Publishing Year'), $rec_d['publish_year'], 'style="width: 40%;"');
+
     // biblio publish place
-        // AJAX expression
-        $ajax_exp = "ajaxFillSelect('".SENAYAN_WEB_ROOT_DIR."admin/AJAX_lookup_handler.php', 'mst_place', 'place_id:place_name', 'placeID', $('plc_search_str').getValue())";
-        // string element
-        if ($rec_d['place_name']) {
-            $plc_options[] = array($rec_d['publish_place_id'], $rec_d['place_name']);
-        }
-        $plc_options[] = array('0', __('Publishing Place'));
-        $str_input = simbio_form_element::selectList('placeID', $plc_options, '', 'style="width: 50%;"');
-        $str_input .= '&nbsp;';
-        $str_input .= simbio_form_element::textField('text', 'plc_search_str', $rec_d['place_name'], 'style="width: 45%;" onkeyup="'.$ajax_exp.'"');
+    // AJAX expression
+    $ajax_exp = "ajaxFillSelect('".SENAYAN_WEB_ROOT_DIR."admin/AJAX_lookup_handler.php', 'mst_place', 'place_id:place_name', 'placeID', $('plc_search_str').getValue())";
+    // string element
+    if ($rec_d['place_name']) {
+        $plc_options[] = array($rec_d['publish_place_id'], $rec_d['place_name']);
+    }
+    $plc_options[] = array('0', __('Publishing Place'));
+    $str_input = simbio_form_element::selectList('placeID', $plc_options, '', 'style="width: 50%;"');
+    $str_input .= '&nbsp;';
+    $str_input .= simbio_form_element::textField('text', 'plc_search_str', $rec_d['place_name'], 'style="width: 45%;" onkeyup="'.$ajax_exp.'"');
     $form->addAnything(__('Publishing Place'), $str_input);
+
     // biblio collation
     $form->addTextField('text', 'collation', __('Collation'), $rec_d['collation'], 'style="width: 40%;"');
     // biblio series title
@@ -415,16 +413,16 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
     // biblio call_number
     $form->addTextField('text', 'callNumber', __('Call Number'), $rec_d['call_number'], 'style="width: 40%;"');
     // biblio topics
-        $str_input = '<div class="'.$visibility.'"><a class="notAJAX"  href="javascript: openWin(\''.MODULES_WEB_ROOT_DIR.'bibliography/pop_topic.php?biblioID='.$rec_d['biblio_id'].'\', \'popTopic\', 500, 200, true)">'.__('Add Subject(s)').'</a></div>';
-        $str_input .= '<iframe name="topicIframe" id="topicIframe" class="borderAll" style="width: 100%; height: 70px;" src="'.MODULES_WEB_ROOT_DIR.'bibliography/iframe_topic.php?biblioID='.$rec_d['biblio_id'].'&block=1"></iframe>';
+    $str_input = '<div class="'.$visibility.'"><a class="notAJAX"  href="javascript: openWin(\''.MODULES_WEB_ROOT_DIR.'bibliography/pop_topic.php?biblioID='.$rec_d['biblio_id'].'\', \'popTopic\', 500, 200, true)">'.__('Add Subject(s)').'</a></div>';
+    $str_input .= '<iframe name="topicIframe" id="topicIframe" class="borderAll" style="width: 100%; height: 70px;" src="'.MODULES_WEB_ROOT_DIR.'bibliography/iframe_topic.php?biblioID='.$rec_d['biblio_id'].'&block=1"></iframe>';
     $form->addAnything(__('Subject(s)'), $str_input);
     // biblio language
-        // get language data related to this record from database
-        $lang_q = $dbs->query("SELECT language_id, language_name FROM mst_language");
-        $lang_options = array();
-        while ($lang_d = $lang_q->fetch_row()) {
-            $lang_options[] = array($lang_d[0], $lang_d[1]);
-        }
+    // get language data related to this record from database
+    $lang_q = $dbs->query("SELECT language_id, language_name FROM mst_language");
+    $lang_options = array();
+    while ($lang_d = $lang_q->fetch_row()) {
+        $lang_options[] = array($lang_d[0], $lang_d[1]);
+    }
     $form->addSelectList('languageID', __('Language'), $lang_options, $rec_d['language_id']);
     // biblio note
     $form->addTextField('textarea', 'notes', __('Abstract/Notes'), $rec_d['notes'], 'style="width: 100%;" rows="2"');
@@ -452,40 +450,36 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
     $promote_options[] = array('1', __('Promote'));
     $form->addRadio('promote', __('Promote To Homepage'), $promote_options, $rec_d['promoted']?'1':'0');
     // biblio labels
-        $arr_labels = !empty($rec_d['labels'])?unserialize($rec_d['labels']):array();
-        if ($arr_labels) {
-            foreach ($arr_labels as $label) { $arr_labels[$label[0]] = $label[1]; }
-        }
-        $str_input = '';
-        // get label data from database
-        $label_q = $dbs->query("SELECT * FROM mst_label LIMIT 20");
-        while ($label_d = $label_q->fetch_assoc()) {
-            $checked = isset($arr_labels[$label_d['label_name']])?' checked':'';
-            $url = isset($arr_labels[$label_d['label_name']])?$arr_labels[$label_d['label_name']]:'';
-            $str_input .= '<div '
-                .'style="background: url('.SENAYAN_WEB_ROOT_DIR.IMAGES_DIR.'/labels/'.$label_d['label_image'].') left center no-repeat; padding-left: 30px; height: 45px;"> '
-                .'<input type="checkbox" name="labels[]" value="'.$label_d['label_name'].'"'.$checked.' /> '.$label_d['label_desc']
-                .'<div>URL : <input type="text" title="Enter a website link/URL to make this label clickable" '
-                .'name="label_urls['.$label_d['label_name'].']" size="50" maxlength="300" value="'.$url.'" /></div></div>';
-        }
+    $arr_labels = !empty($rec_d['labels'])?unserialize($rec_d['labels']):array();
+    if ($arr_labels) {
+        foreach ($arr_labels as $label) { $arr_labels[$label[0]] = $label[1]; }
+    }
+    $str_input = '';
+    // get label data from database
+    $label_q = $dbs->query("SELECT * FROM mst_label LIMIT 20");
+    while ($label_d = $label_q->fetch_assoc()) {
+        $checked = isset($arr_labels[$label_d['label_name']])?' checked':'';
+        //$url = isset($arr_labels[$label_d['label_name']])?$arr_labels[$label_d['label_name']]:'';
+        $str_input .= '<div '
+        .'style="background: url('.SENAYAN_WEB_ROOT_DIR.IMAGES_DIR.'/labels/'.$label_d['label_image'].') left center no-repeat; padding-left: 30px; height: 45px;"> '
+        .'<input type="checkbox" name="labels[]" value="'.$label_d['label_name'].'"'.$checked.' /> '.$label_d['label_desc']
+        .'<div>URL : <input type="text" title="Enter a website link/URL to make this label clickable" '
+        .'name="label_urls['.$label_d['label_name'].']" size="50" maxlength="300" value="'.$url.'" /></div></div>';
+    }
     $form->addAnything('Label', $str_input);
     // $form->addCheckBox('labels', 'Label', $label_options, explode(' ', $rec_d['labels']));
 
     // edit mode messagge
     if ($form->edit_mode) {
         echo '<div class="infoBox" style="overflow: auto;">'
-            .'<div style="float: left; width: 80%;">'.__('You are going to edit biblio data').' : <b>'.$rec_d['title'].'</b>  <br />'.__('Last Updated').$rec_d['last_update'].'</div>'; //mfc
-            if ($rec_d['image']) {
-                if (file_exists(IMAGES_BASE_DIR.'docs/'.$rec_d['image'])) {
-                    $upper_dir = '';
-                    if ($in_pop_up) {
-                        $upper_dir = '../../';
-                    }
-                    echo '<div style="float: right;"><img src="'.$upper_dir.'../lib/phpthumb/phpThumb.php?src=../../images/docs/'.urlencode($rec_d['image']).'&w=53" style="border: 1px solid #999999" /></div>';
-                }
+        .'<div style="float: left; width: 80%;">'.__('You are going to edit biblio data').' : <b>'.$rec_d['title'].'</b>  <br />'.__('Last Updated').$rec_d['last_update'].'</div>'; //mfc
+        if ($rec_d['image']) {
+            if (file_exists(IMAGES_BASE_DIR.'docs/'.$rec_d['image'])) {
+                echo '<div style="float: right;"><img src="'.LIB_WEB_ROOT_DIR.'phpthumb/phpThumb.php?src='.IMAGES_BASE_DIR.'docs/'.urlencode($rec_d['image']).'&w=53" style="border: 1px solid #999999" /></div>';
             }
-        echo '</div>'."\n";
+        }
     }
+    echo '</div>'."\n";
     // print out the form object
     echo $form->printOut();
 } else {
@@ -493,8 +487,7 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
     require LIB_DIR.'biblio_list.inc.php';
     /* BIBLIOGRAPHY LIST */
     // callback function to show title and authors in datagrid
-    function showTitleAuthors($obj_db, $array_data)
-    {
+    function showTitleAuthors($obj_db, $array_data) {
         // biblio author detail
         $_biblio_q = $obj_db->query('SELECT b.title, a.author_name, opac_hide, promoted FROM biblio AS b
             LEFT JOIN biblio_author AS ba ON b.biblio_id=ba.biblio_id
@@ -575,9 +568,8 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
     $datagrid->chbox_form_URL = $_SERVER['PHP_SELF'];
     $datagrid->debug = true;
 
-    $biblio_result_num = ($sysconf['biblio_result_num']>100)?100:$sysconf['biblio_result_num'];
     // put the result into variables
-    $datagrid_result = $datagrid->createDataGrid($dbs, $table_spec, $biblio_result_num, ($can_read AND $can_write));
+    $datagrid_result = $datagrid->createDataGrid($dbs, $table_spec, 20, ($can_read AND $can_write));
     if (isset($_GET['keywords']) AND $_GET['keywords']) {
         $msg = str_replace('{result->num_rows}', $datagrid->num_rows, __('Found <strong>{result->num_rows}</strong> from your keywords')); //mfc
         echo '<div class="infoBox">'.$msg.' : "'.$_GET['keywords'].'"<div>'.__('Query took').' <b>'.$datagrid->query_time.'</b> '.__('second(s) to complete').'</div></div>'; //mfc

@@ -179,7 +179,7 @@ CREATE TABLE `mst_item_status` (
   `input_date` date DEFAULT NULL,
   `last_update` date DEFAULT NULL,
   PRIMARY KEY (`item_status_id`),
-  UNIQUE KEY `item_status_name` (`item_status_name`)
+  UNIQUE KEY `item_status_name` (`item_status_name`),
   KEY `no_loan` (`no_loan`),
   KEY `skip_stock_take` (`skip_stock_take`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -188,9 +188,9 @@ CREATE TABLE `mst_item_status` (
 -- Dumping data for table `mst_item_status`
 --
 
-INSERT INTO `mst_item_status` (`item_status_id`, `item_status_name`, `rules`, `input_date`, `last_update`) VALUES
-('R', 'Reparatur', 'a:1:{i:0;s:1:"1";}', 1, 0, '2009-08-16', '2009-08-20'),
-('NA', 'Nicht Ausleihbar', 'a:1:{i:0;s:1:"1";}', 1, 0, '2009-08-16', '2009-08-20');
+INSERT INTO `mst_item_status` (`item_status_id`, `item_status_name`, `rules`, `no_loan`, `skip_stock_take`,`input_date`, `last_update`) VALUES
+('R',  'Reparatur',        'a:1:{i:0;s:1:"1";}', 1, 0, NOW(),NOW()),
+('NA', 'Nicht Ausleihbar', 'a:1:{i:0;s:1:"1";}', 1, 0, NOW(),NOW());
 
 -- --------------------------------------------------------
 
@@ -325,11 +325,16 @@ INSERT INTO `setting` (`setting_id`, `setting_name`, `setting_value`) VALUES
 (6, 'opac_result_num', 's:2:"10";'),
 (7, 'enable_promote_titles', 'a:1:{i:0;s:1:"1";}'),
 (8, 'quick_return', 'b:1;'),
-(9, 'loan_limit_override', 'b:0;'),
-(10, 'enable_xml_detail', 'b:1;'),
-(11, 'enable_xml_result', 'b:1;'),
-(12, 'allow_file_download', 'b:1;'),
-(13, 'session_timeout', 's:4:"7200";');
+(9, 'allow_loan_date_change', 'b:0;'),
+(10, 'loan_limit_override', 'b:0;'),
+(11, 'enable_xml_detail', 'b:1;'),
+(12, 'enable_xml_result', 'b:1;'),
+(13, 'allow_file_download', 'b:1;'),
+(14, 'session_timeout', 's:4:"7200";'),
+(15, 'circulation_receipt', 'b:1;'),
+(16, 'barcode_encoding', 's:4:"128B";'),
+(17, 'enable_confirmation_popup', 'b:0;'),
+(18, 'enable_overdue_warning', 'b:0;');
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

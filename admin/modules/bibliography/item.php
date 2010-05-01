@@ -66,22 +66,22 @@ if (isset($_POST['saveData']) AND $can_read AND $can_write) {
             $data['inventory_code'] = 'literal{NULL}';
         }
 
-        $data['location_id'] = $_POST['locationID'];
-        $data['site'] = trim($dbs->escape_string(strip_tags($_POST['itemSite'])));
-        $data['coll_type_id'] = intval($_POST['collTypeID']);
+        $data['location_id']    = $_POST['locationID'];
+        $data['site']           = trim($dbs->escape_string(strip_tags($_POST['itemSite'])));
+        $data['coll_type_id']   = intval($_POST['collTypeID']);
         $data['item_status_id'] = $dbs->escape_string($_POST['itemStatusID']);
-        $data['source'] = $_POST['source'];
-        $data['order_no'] = trim($dbs->escape_string(strip_tags($_POST['orderNo'])));
-        $data['order_date'] = $_POST['ordDate'];
-        $data['received_date'] = $_POST['recvDate'];
-        $data['supplier_id'] = $_POST['supplierID'];
-        $data['invoice'] = $_POST['invoice'];
-        $data['invoice_date'] = $_POST['invcDate'];
+        $data['source']         = (isset($_POST['source']))?intval($_POST['source']):'2';
+        $data['order_no']       = trim($dbs->escape_string(strip_tags($_POST['orderNo'])));
+        $data['order_date']     = (isset($_POST['ordDate']) & !empty($_POST['ordDate']))?$_POST['ordDate']:'literal{NULL}';
+        $data['received_date']  = (isset($_POST['recvDate']) & !empty($_POST['recvDate']))?$_POST['recvDate']:'literal{NULL}';
+        $data['supplier_id']    = (isset($_POST['supplierID']) & !empty($_POST['supplierID']))?$_POST['supplierID']:'literal{NULL}';
+        $data['invoice']        = $_POST['invoice'];
+        $data['invoice_date']   = (isset($_POST['invcDate']) & !empty($_POST['invcDate']))?$_POST['invcDate']:'literal{NULL}';
         $data['price_currency'] = trim($dbs->escape_string(strip_tags($_POST['priceCurrency'])));
         if (!$data['price_currency']) { $data['price_currency'] = 'literal{NULL}'; }
-        $data['price'] = preg_replace('@[.,\-a-z ]@i', '', strip_tags($_POST['price']));
-        $data['input_date'] = date('Y-m-d H:i:s');
-        $data['last_update'] = date('Y-m-d H:i:s');
+        $data['price']          = preg_replace('@[.,\-a-z ]@i', '', strip_tags($_POST['price']));
+        $data['input_date']     = date('Y-m-d H:i:s');
+        $data['last_update']    = date('Y-m-d H:i:s');
 
         // create sql op object
         $sql_op = new simbio_dbop($dbs);
@@ -96,7 +96,7 @@ if (isset($_POST['saveData']) AND $can_read AND $can_write) {
             if ($update) {
                 // write log
                 utility::writeLogs($dbs, 'staff', $_SESSION['uid'], 'bibliography', $_SESSION['realname'].' update item data ('.$data['item_code'].') with title ('.$title.')');
-                utility::jsAlert(__('Item Data Successfully Updated'));
+                // utility::jsAlert(__('Item Data Successfully Updated'));
                 if ($in_pop_up) {
                     echo '<script type="text/javascript">parent.opener.parent.setIframeContent(\'itemIframe\', \''.MODULES_WEB_ROOT_DIR.'bibliography/iframe_item_list.php?biblioID='.$data['biblio_id'].'\');</script>';
                     echo '<script type="text/javascript">parent.window.close();</script>';
@@ -183,20 +183,21 @@ if (isset($_POST['saveData']) AND $can_read AND $can_write) {
 /* RECORD OPERATION END */
 
 if (!$in_pop_up) {
-/* search form */
-?>
+    /* search form */
+    ?>
 <fieldset class="menuBox">
-<div class="menuBoxInner itemIcon">
-    <?php echo strtoupper(__('Items')); ?>
-    <hr />
-    <form name="search" action="<?php echo MODULES_WEB_ROOT_DIR; ?>bibliography/item.php" id="search" method="get" style="display: inline;"><?php echo __('Search'); ?> :
-    <input type="text" name="keywords" id="keywords" size="30" />
-    <input type="submit" id="doSearch" value="<?php echo __('Search'); ?>" class="button" />
-    </form>
+<div class="menuBoxInner itemIcon"><?php echo strtoupper(__('Items')); ?>
+<hr />
+<form name="search"
+	action="<?php echo MODULES_WEB_ROOT_DIR; ?>bibliography/item.php"
+	id="search" method="get" style="display: inline;"><?php echo __('Search'); ?>
+: <input type="text" name="keywords" id="keywords" size="30" /> <input
+	type="submit" id="doSearch" value="<?php echo __('Search'); ?>"
+	class="button" /></form>
 </div>
 </fieldset>
-<?php
-/* search form end */
+    <?php
+    /* search form end */
 }
 /* main content */
 if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'detail')) {
@@ -274,62 +275,64 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
     // inventory code
     $form->addTextField('text', 'inventoryCode', __('Inventory Code'), $rec_d['inventory_code'], 'style="width: 100%;"');
     // item location
-        // get location data related to this record from database
-        $location_q = $dbs->query("SELECT location_id, location_name FROM mst_location");
-        $location_options = array();
-        while ($location_d = $location_q->fetch_row()) {
-            $location_options[] = array($location_d[0], $location_d[1]);
-        }
+    // get location data related to this record from database
+    $location_q = $dbs->query("SELECT location_id, location_name FROM mst_location");
+    $location_options = array();
+    while ($location_d = $location_q->fetch_row()) {
+        $location_options[] = array($location_d[0], $location_d[1]);
+    }
     $form->addSelectList('locationID', __('Location'), $location_options, $rec_d['location_id']);
     // item site
     $form->addTextField('text', 'itemSite', __('Shelf Location'), $rec_d['site'], 'style="width: 40%;"');
     // collection type
-        // get collection type data related to this record from database
-        $coll_type_q = $dbs->query("SELECT coll_type_id, coll_type_name FROM mst_coll_type");
-        $coll_type_options = array();
-        while ($coll_type_d = $coll_type_q->fetch_row()) {
-            $coll_type_options[] = array($coll_type_d[0], $coll_type_d[1]);
-        }
+    // get collection type data related to this record from database
+    $coll_type_q = $dbs->query("SELECT coll_type_id, coll_type_name FROM mst_coll_type");
+    $coll_type_options = array();
+    while ($coll_type_d = $coll_type_q->fetch_row()) {
+        $coll_type_options[] = array($coll_type_d[0], $coll_type_d[1]);
+    }
     $form->addSelectList('collTypeID', __('Collection Type'), $coll_type_options, $rec_d['coll_type_id']);
     // item status
-        // get item status data from database
-        $item_status_q = $dbs->query("SELECT item_status_id, item_status_name FROM mst_item_status");
-        $item_status_options[] = array('0', __('Available'));
-        while ($item_status_d = $item_status_q->fetch_row()) {
-            $item_status_options[] = array($item_status_d[0], $item_status_d[1]);
-        }
+    // get item status data from database
+    $item_status_q = $dbs->query("SELECT item_status_id, item_status_name FROM mst_item_status");
+    $item_status_options[] = array('0', __('Available'));
+    while ($item_status_d = $item_status_q->fetch_row()) {
+        $item_status_options[] = array($item_status_d[0], $item_status_d[1]);
+    }
     $form->addSelectList('itemStatusID', __('Item Status'), $item_status_options, $rec_d['item_status_id']);
     // order number
-    $form->addTextField('text', 'orderNo', __('Order Number'), $rec_d['order_no'], 'style="width: 40%;"');
+    // $form->addTextField('text', 'orderNo', __('Order Number'), $rec_d['order_no'], 'style="width: 40%;"');
     // order date
-    $form->addDateField('ordDate', __('Order Date'), $rec_d['order_date']?$rec_d['order_date']:date('Y-m-d'));
+    // $form->addDateField('ordDate', __('Order Date'), $rec_d['order_date']?$rec_d['order_date']:date('Y-m-d'));
     // received date
-    $form->addDateField('recvDate', __('Receiving Date'), $rec_d['received_date']?$rec_d['received_date']:date('Y-m-d'));
+    // $form->addDateField('recvDate', __('Receiving Date'), $rec_d['received_date']?$rec_d['received_date']:date('Y-m-d'));
     // item supplier
-        // get item status data from database
-        $supplier_q = $dbs->query("SELECT supplier_id, supplier_name FROM mst_supplier");
-        $supplier_options[] = array('0', __('Not Applicable'));
-        while ($supplier_d = $supplier_q->fetch_row()) {
-            $supplier_options[] = array($supplier_d[0], $supplier_d[1]);
-        }
-    $form->addSelectList('supplierID', __('Supplier'), $supplier_options, $rec_d['supplier_id']);
+    // get item status data from database
+    // $supplier_q = $dbs->query("SELECT supplier_id, supplier_name FROM mst_supplier");
+    // $supplier_options[] = array('0', __('Not Applicable'));
+    // while ($supplier_d = $supplier_q->fetch_row()) {
+    //     $supplier_options[] = array($supplier_d[0], $supplier_d[1]);
+    // }
+    // $form->addSelectList('supplierID', __('Supplier'), $supplier_options, $rec_d['supplier_id']);
+
     // item source
-        $source_options[] = array('1', __('Buy'));
-        $source_options[] = array('2', __('Prize/Grant'));
+    $source_options[] = array('1', __('Buy'));
+    $source_options[] = array('2', __('Prize/Grant'));
     $form->addRadio('source', __('Source'), $source_options, !empty($rec_d['source'])?$rec_d['source']:'1');
+
     // item invoice
-    $form->addTextField('text', 'invoice', __('Invoice'), $rec_d['invoice'], 'style="width: 100%;"');
+    // $form->addTextField('text', 'invoice', __('Invoice'), $rec_d['invoice'], 'style="width: 100%;"');
     // invoice date
-    $form->addDateField('invcDate', __('Invoice Date'), $rec_d['invoice_date']?$rec_d['invoice_date']:date('Y-m-d'));
+    // $form->addDateField('invcDate', __('Invoice Date'), $rec_d['invoice_date']?$rec_d['invoice_date']:date('Y-m-d'));
     // price
-    $str_input = simbio_form_element::textField('text', 'price', !empty($rec_d['price'])?$rec_d['price']:'0', 'style="width: 40%;"');
+    $str_input = simbio_form_element::textField('text', 'price', !empty($rec_d['price'])?$rec_d['price']:'0', 'style="width: 10%;"');
     $str_input .= simbio_form_element::selectList('priceCurrency', $sysconf['currencies'], $rec_d['price_currency']);;
     $form->addAnything(__('Price'), $str_input);
 
     // edit mode messagge
     if ($form->edit_mode) {
         echo '<div class="infoBox">'.__('You are going to edit Item data').': <b>'.$rec_d['title'].'</b> ' //mfc
-            .'<br />'.__('Last Updated').' '.$rec_d['last_update'];
+        .'<br />'.__('Last Updated').' '.$rec_d['last_update'];
         echo '</div>'."\n";
     }
     // print out the form object

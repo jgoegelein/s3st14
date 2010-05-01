@@ -868,7 +868,7 @@ INSERT INTO `setting` (`setting_id`, `setting_name`, `setting_value`) VALUES
 (4, 'admin_template', 'a:2:{s:5:"theme";s:7:"default";s:3:"css";s:32:"admin_template/default/style.css";}'),
 (5, 'default_lang', 's:5:"en_US";'),
 (6, 'opac_result_num', 's:2:"10";'),
-(7, 'enable_promote_titles', 'N;'),
+(7, 'enable_promote_titles', 'a:1:{i:0;s:1:"1";}'),
 (8, 'quick_return', 'b:1;'),
 (9, 'allow_loan_date_change', 'b:0;'),
 (10, 'loan_limit_override', 'b:0;'),
@@ -877,7 +877,9 @@ INSERT INTO `setting` (`setting_id`, `setting_name`, `setting_value`) VALUES
 (13, 'allow_file_download', 'b:1;'),
 (14, 'session_timeout', 's:4:"7200";'),
 (15, 'circulation_receipt', 'b:1;'),
-(16, 'barcode_encoding', 's:4:"128B";');
+(16, 'barcode_encoding', 's:4:"128B";'),
+(17, 'enable_confirmation_popup', 'b:0;'),
+(18, 'enable_overdue_warning', 'b:0;');
 
 -- --------------------------------------------------------
 
@@ -1008,19 +1010,3 @@ CREATE TABLE IF NOT EXISTS `user_group` (
 
 INSERT INTO `user_group` (`group_id`, `group_name`, `input_date`, `last_update`) VALUES
 (1, 'Administrator', DATE(NOW()), DATE(NOW()));
-
--- --------------------------------------------------------
-
---
--- Table structure for table `visitor_count`
---
-
-CREATE TABLE IF NOT EXISTS `visitor_count` (
-  `visitor_id` int(11) NOT NULL AUTO_INCREMENT,
-  `member_id` varchar(20) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `member_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `institution` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `checkin_date` datetime NOT NULL,
-  PRIMARY KEY (`visitor_id`),
-  KEY `member_id` (`member_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

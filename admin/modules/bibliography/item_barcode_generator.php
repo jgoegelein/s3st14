@@ -76,7 +76,7 @@ if (isset($_POST['itemID']) AND !empty($_POST['itemID']) AND isset($_POST['itemA
             /* replace invalid characters */
             $barcode_text = str_replace(array(':', ',', '*', '@'), '', $barcode_text);
             // send ajax request
-            echo 'new Ajax.Request(\''.SENAYAN_WEB_ROOT_DIR.'lib/phpbarcode/barcode.php?code='.$itemID.'&encoding='.$sysconf['barcode_encoding'].'&scale='.$size.'&mode=png\', { method: \'get\', onFailure: function(sendAlert) { alert(\'Error creating barcode!\'); } });'."\n";
+            echo 'new Ajax.Request(\''.SENAYAN_WEB_ROOT_DIR.'lib/phpbarcode/barcode.php?code='.$itemID.'&encoding='.$sysconf['barcode_encoding'][0].'&scale='.$size.'&mode=png\', { method: \'get\', onFailure: function(sendAlert) { alert(\'Error creating barcode!\'); } });'."\n";
             // add to sessions
             $_SESSION['barcodes'][$itemID] = $itemID;
             $print_count++;
@@ -149,13 +149,13 @@ if (isset($_GET['action']) AND $_GET['action'] == 'print') {
     $html_str .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />';
     $html_str .= '<meta http-equiv="Pragma" content="no-cache" /><meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0" /><meta http-equiv="Expires" content="Sat, 26 Jul 1997 05:00:00 GMT" />';
     $html_str .= '<style type="text/css">'."\n";
-    $html_str .= 'body { padding: 0; margin: 1cm; font-family: '.$barcode_fonts.'; font-size: '.$barcode_font_size.'; }'."\n";
+    $html_str .= 'body { padding: 0; margin: 0cm; font-family: '.$barcode_fonts.'; font-size: '.$barcode_font_size.'; }'."\n";
     $html_str .= '.labelStyle { width: '.$barcode_box_width.'cm; height: '.$barcode_box_height.'cm; text-align: center; margin: '.$barcode_items_margin.'cm; border: '.$barcode_border_size.'px solid #000000;}'."\n";
-    $html_str .= '.labelHeaderStyle { background-color: #CCCCCC; font-weight: bold; padding: 5px; margin-bottom: 5px; }'."\n";
+    $html_str .= '.labelHeaderStyle { background-color: #CCCCCC; font-weight: bold; font-size: 8pt; padding: 5px; margin-bottom: 5px; }'."\n";
     $html_str .= '</style>'."\n";
     $html_str .= '</head>'."\n";
     $html_str .= '<body>'."\n";
-    $html_str .= '<table style="margin: 0; padding: 0;" cellspacing="0" cellpadding="0">'."\n";
+    $html_str .= '<table border="1" style="margin: 0; padding: 0;" cellspacing="0" cellpadding="0">'."\n";
     // loop the chunked arrays to row
     foreach ($chunked_barcode_arrays as $barcode_rows) {
         $html_str .= '<tr>'."\n";
@@ -165,15 +165,15 @@ if (isset($_GET['action']) AND $_GET['action'] == 'print') {
             if ($barcode_include_header_text) { $html_str .= '<div class="labelHeaderStyle">'.($barcode_header_text?$barcode_header_text:$sysconf['library_name']).'</div>'; }
             // document title
             $html_str .= '<div style="font-size: 7pt;">';
-            if ($barcode_cut_title) {
-                $html_str .= substr($barcode[0], 0, $barcode_cut_title).'...';
-            } else { $html_str .= $barcode[0]; }
+            //if ($barcode_cut_title) {
+            //    $html_str .= substr($barcode[0], 0, $barcode_cut_title).'...';
+            //} else { $html_str .= $barcode[0]; }
             $html_str .= '</div>';
-            $html_str .= '<img src="'.SENAYAN_WEB_ROOT_DIR.IMAGES_DIR.'/barcodes/'.str_replace(array(' '), '_', $barcode[1]).'.png" style="width: '.$barcode_scale.'%;" border="0" />';
+            $html_str .= '<img src="'.SENAYAN_WEB_ROOT_DIR.IMAGES_DIR.'/barcodes/'.str_replace(array(' '), '_', $barcode[1]).'.png" style="height: '.$barcode_scale.'%; width: '.$barcode_scale.'%;" border="0" />';
             $html_str .= '</div>';
             $html_str .= '</td>';
         }
-        $html_str .= '<tr>'."\n";
+        $html_str .= '</tr>'."\n";
     }
     $html_str .= '</table>'."\n";
     $html_str .= '<script type="text/javascript">self.print();</script>'."\n";
@@ -194,23 +194,26 @@ if (isset($_GET['action']) AND $_GET['action'] == 'print') {
 
 ?>
 <fieldset class="menuBox">
-<div class="menuBoxInner printIcon">
-    <?php echo __('Item Barcodes Printing'); ?> - <a target="blindSubmit" href="<?php echo MODULES_WEB_ROOT_DIR; ?>bibliography/item_barcode_generator.php?action=print" class="notAJAX headerText2"><?php echo __('Print Barcodes for Selected Data');?></a>
-    &nbsp; <a target="blindSubmit" href="<?php echo MODULES_WEB_ROOT_DIR; ?>bibliography/item_barcode_generator.php?action=clear" class="notAJAX headerText2" style="color: #FF0000;"><?php echo __('Clear Print Queue'); ?></a>
-    <hr />
-    <form name="search" action="<?php echo MODULES_WEB_ROOT_DIR; ?>bibliography/item_barcode_generator.php" id="search" method="get" style="display: inline;"><?php echo __('Search'); ?> :
-    <input type="text" name="keywords" size="30" />
-    <input type="submit" id="doSearch" value="<?php echo __('Search'); ?>" class="button" />
-    </form>
-    <div style="margin-top: 3px;">
-    <?php
-    echo __('Maximum').' <font style="color: #FF0000">'.$max_print.'</font> '.__('records can be printed at once. Currently there is').' '; //mfc
-    if (isset($_SESSION['barcodes'])) {
-        echo '<font id="queueCount" style="color: #FF0000">'.count($_SESSION['barcodes']).'</font>';
-    } else { echo '<font id="queueCount" style="color: #FF0000">0</font>'; }
-    echo ' '.__('in queue waiting to be printed.'); //mfc
-    ?>
-    </div>
+<div class="menuBoxInner printIcon"><?php echo __('Item Barcodes Printing'); ?>
+- <a target="blindSubmit"
+	href="<?php echo MODULES_WEB_ROOT_DIR; ?>bibliography/item_barcode_generator.php?action=print"
+	class="notAJAX headerText2"><?php echo __('Print Barcodes for Selected Data');?></a>
+&nbsp; <a target="blindSubmit"
+	href="<?php echo MODULES_WEB_ROOT_DIR; ?>bibliography/item_barcode_generator.php?action=clear"
+	class="notAJAX headerText2" style="color: #FF0000;"><?php echo __('Clear Print Queue'); ?></a>
+<hr />
+<form name="search"
+	action="<?php echo MODULES_WEB_ROOT_DIR; ?>bibliography/item_barcode_generator.php"
+	id="search" method="get" style="display: inline;"><?php echo __('Search'); ?>
+: <input type="text" name="keywords" size="30" /> <input type="submit"
+	id="doSearch" value="<?php echo __('Search'); ?>" class="button" /></form>
+<div style="margin-top: 3px;"><?php
+echo __('Maximum').' <font style="color: #FF0000">'.$max_print.'</font> '.__('records can be printed at once. Currently there is').' '; //mfc
+if (isset($_SESSION['barcodes'])) {
+    echo '<font id="queueCount" style="color: #FF0000">'.count($_SESSION['barcodes']).'</font>';
+} else { echo '<font id="queueCount" style="color: #FF0000">0</font>'; }
+echo ' '.__('in queue waiting to be printed.'); //mfc
+?></div>
 </div>
 </fieldset>
 <?php

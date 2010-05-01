@@ -250,15 +250,21 @@ if (isset($_POST['saveData']) AND $can_read AND $can_write) {
 /* search form */
 ?>
 <fieldset class="menuBox">
-<div class="menuBoxInner memberIcon">
-    <?php echo strtoupper(__('Membership')); ?> - <a href="<?php echo MODULES_WEB_ROOT_DIR; ?>membership/index.php?action=detail" class="headerText2"><?php echo __('Add New Member'); ?></a>
-    &nbsp; <a href="<?php echo MODULES_WEB_ROOT_DIR; ?>membership/index.php" class="headerText2"><?php echo __('Member List'); ?></a>
-    &nbsp; <a href="<?php echo MODULES_WEB_ROOT_DIR; ?>membership/index.php?expire=true" class="headerText2" style="color: #FF0000;"><?php echo __('View Expired Member'); ?></a>
-    <hr />
-    <form name="search" action="<?php echo MODULES_WEB_ROOT_DIR; ?>membership/index.php" id="search" method="get" style="display: inline;"><?php echo __('Member Search'); ?> :
-    <input type="text" name="keywords" size="30" /><?php if (isset($_GET['expire'])) { echo '<input type="hidden" name="expire" value="true" />'; } ?>
-    <input type="submit" id="doSearch" value="<?php echo __('Search'); ?>" class="button" />
-</form>
+<div class="menuBoxInner memberIcon"><?php echo strtoupper(__('Membership')); ?>
+- <a
+	href="<?php echo MODULES_WEB_ROOT_DIR; ?>membership/index.php?action=detail"
+	class="headerText2"><?php echo __('Add New Member'); ?></a> &nbsp; <a
+	href="<?php echo MODULES_WEB_ROOT_DIR; ?>membership/index.php"
+	class="headerText2"><?php echo __('Member List'); ?></a> &nbsp; <a
+	href="<?php echo MODULES_WEB_ROOT_DIR; ?>membership/index.php?expire=true"
+	class="headerText2" style="color: #FF0000;"><?php echo __('View Expired Member'); ?></a>
+<hr />
+<form name="search"
+	action="<?php echo MODULES_WEB_ROOT_DIR; ?>membership/index.php"
+	id="search" method="get" style="display: inline;"><?php echo __('Member Search'); ?>
+: <input type="text" name="keywords" size="30" /><?php if (isset($_GET['expire'])) { echo '<input type="hidden" name="expire" value="true" />'; } ?>
+<input type="submit" id="doSearch" value="<?php echo __('Search'); ?>"
+	class="button" /></form>
 </div>
 </fieldset>
 <?php
@@ -331,12 +337,12 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
     // member institution
     $form->addTextField('text', 'instName', __('Institution'), $rec_d['inst_name'], 'style="width: 100%;"');
     // member type
-        // get mtype data related to this record from database
-        $mtype_query = $dbs->query("SELECT member_type_id, member_type_name FROM mst_member_type");
-        $mtype_options = array();
-        while ($mtype_data = $mtype_query->fetch_row()) {
-            $mtype_options[] = array($mtype_data[0], $mtype_data[1]);
-        }
+    // get mtype data related to this record from database
+    $mtype_query = $dbs->query("SELECT member_type_id, member_type_name FROM mst_member_type");
+    $mtype_options = array();
+    while ($mtype_data = $mtype_query->fetch_row()) {
+        $mtype_options[] = array($mtype_data[0], $mtype_data[1]);
+    }
     $form->addSelectList('memberTypeID', __('Membership Type').'*', $mtype_options, $rec_d['member_type_id']);
     // member gender
     $gender_chbox[0] = array('1', __('Male'));
@@ -377,14 +383,14 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
     // edit mode messagge
     if ($form->edit_mode) {
         echo '<div class="infoBox" style="overflow: auto;">'
-            .'<div style="float: left; width: 80%;">'.__('You are going to edit member data').' : <b>'.$rec_d['member_name'].'</b> <br />'.__('Last Updated').' '.$rec_d['last_update'].' '.$expired_message
-            .'<div>'.__('Leave Password field blank if you don\'t want to change the password').'</div>'
-            .'</div>';
-            if ($rec_d['member_image']) {
-                if (file_exists(IMAGES_BASE_DIR.'persons/'.$rec_d['member_image'])) {
-                    echo '<div style="float: right;"><img src="../lib/phpthumb/phpThumb.php?src=../../images/persons/'.urlencode($rec_d['member_image']).'&w=53" style="border: 1px solid #999999" /></div>';
-                }
+        .'<div style="float: left; width: 80%;">'.__('You are going to edit member data').' : <b>'.$rec_d['member_name'].'</b> <br />'.__('Last Updated').' '.$rec_d['last_update'].' '.$expired_message
+        .'<div>'.__('Leave Password field blank if you don\'t want to change the password').'</div>'
+        .'</div>';
+        if ($rec_d['member_image']) {
+            if (file_exists(IMAGES_BASE_DIR.'persons/'.$rec_d['member_image'])) {
+                echo '<div style="float: right;"><img src="'.LIB_WEB_ROOT_DIR.'phpthumb/phpThumb.php?src='.IMAGES_BASE_DIR.'persons/'.urlencode($rec_d['member_image']).'&w=53" style="border: 1px solid #999999" /></div>';
             }
+        }
         echo '</div>'."\n";
     }
     // print out the form object
@@ -416,8 +422,8 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
     // is there any search
     $criteria = 'm.member_id IS NOT NULL ';
     if (isset($_GET['keywords']) AND $_GET['keywords']) {
-       $keywords = $dbs->escape_string($_GET['keywords']);
-       $criteria .= " AND (m.member_name LIKE '%$keywords%' OR m.member_id LIKE '%$keywords%') ";
+        $keywords = $dbs->escape_string($_GET['keywords']);
+        $criteria .= " AND (m.member_name LIKE '%$keywords%' OR m.member_id LIKE '%$keywords%') ";
     }
     if (isset($_GET['expire'])) {
         $criteria .= " AND TO_DAYS('".date('Y-m-d')."')>TO_DAYS(m.expire_date)";

@@ -97,7 +97,7 @@ if ($file_q->num_rows > 0) {
 		    <body>
 			<div id="wrapper">
 			<?php if ($sysconf['allow_pdf_download']) { ?>
-			<div style="text-align: right; vertical-align:text-top;"><a href=""><img align="top" border='0' src='../../images/labels/adobe-reader.png' /></a><span style="font-family: verdana; font-size:11px; font-weight: bold;"> <a href="../../index.php?p=fstream-pdf&fid=<?php echo $fileID; ?>&bid=<?php echo $biblioID; ?>">Download PDF</a></span></div>
+			<div style="text-align: right; vertical-align:text-top;"><a href=""><img align="top" border='0' src='<?php echo IMAGES_BASE_DIR?>/labels/adobe-reader.png' /></a><span style="font-family: verdana; font-size:11px; font-weight: bold;"> <a href="../../index.php?p=fstream-pdf&fid=<?php echo $fileID; ?>&bid=<?php echo $biblioID; ?>">Download PDF</a></span></div>
 			<?php } ?>
 
 			<div id="website">

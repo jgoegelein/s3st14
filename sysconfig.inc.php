@@ -20,6 +20,13 @@
  *
  */
 
+$mandantbase = apache_getenv("MANDANTBASE");
+if (!empty($mandantbase)) {
+    
+    $m_config = $mandantbase.DIRECTORY_SEPARATOR.'conf.php';
+    require_once $m_config;
+}
+
 // be sure that this file not accessed directly
 if (basename($_SERVER['PHP_SELF']) == basename(__FILE__)) {
     die();
@@ -43,15 +50,14 @@ if (get_magic_quotes_gpc()) {
     $_REQUEST = array_map('stripslashes_deep', $_REQUEST);
 }
 // turn off all error messages for security reason
-@ini_set('display_errors', true);
+@ini_set('display_errors', false);
 // check if safe mode is on
 if ((bool) ini_get('safe_mode')) {
     define('SENAYAN_IN_SAFE_MODE', 1);
 }
-
 // set default timezone
 // for a list of timezone, please see PHP Manual at "List of Supported Timezones" section
-@date_default_timezone_set('Asia/Jakarta');
+@date_default_timezone_set('Europe/Berlin');
 
 // senayan version
 define('SENAYAN_VERSION', 'senayan3-stable14');
@@ -98,10 +104,13 @@ define('LANGUAGES_BASE_DIR', LIB_DIR.'lang'.DIRECTORY_SEPARATOR);
 
 // senayan web doc root dir
 $temp_senayan_web_root_dir = preg_replace('@admin.*@i', '', dirname($_SERVER['PHP_SELF']));
-define('SENAYAN_WEB_ROOT_DIR', $temp_senayan_web_root_dir.(preg_match('@\/$@i', $temp_senayan_web_root_dir)?'':'/'));
+define('SENAYAN_WEB_ROOT_DIR', ($temp_senayan_web_root_dir==DIRECTORY_SEPARATOR)?'/':$temp_senayan_web_root_dir);
 
 // javascript library web root dir
 define('JS_WEB_ROOT_DIR', SENAYAN_WEB_ROOT_DIR.'js/');
+
+// lib web root dir
+define('LIB_WEB_ROOT_DIR', SENAYAN_WEB_ROOT_DIR.'lib/');
 
 // library automation module web root dir
 define('MODULES_WEB_ROOT_DIR', SENAYAN_WEB_ROOT_DIR.'admin/'.MODULES_DIR.'/');
@@ -140,9 +149,9 @@ $sysconf['baseurl'] = '';
 // change below setting according to your database configuration
 define('DB_HOST', 'localhost');
 define('DB_PORT', '3306');
-define('DB_NAME', 's3st14');
-define('DB_USERNAME', 'root');
-define('DB_PASSWORD', 'bekasi');
+define('DB_NAME', 's3st12p3');
+define('DB_USERNAME', 'senayan');
+define('DB_PASSWORD', 'senayan');
 // we prefer to use mysqli extensions if its available
 if (extension_loaded('mysqli')) {
     /* MYSQLI */
@@ -205,7 +214,7 @@ $sysconf['temp_dir'] = '/tmp';
 $sysconf['backup_dir'] = FILES_UPLOAD_DIR.'backup'.DIRECTORY_SEPARATOR;
 
 /* FILE DOWNLOAD */
-$sysconf['allow_file_download'] = false;
+$sysconf['allow_file_download'] = true;
 
 /* BARCODE config */
 // encoding selection
@@ -233,7 +242,12 @@ $sysconf['loan_limit_override'] = false;
 $sysconf['allow_loan_date_change'] = false;
 
 /* CIRCULATION RECEIPT */
-$sysconf['circulation_receipt'] = true;
+$sysconf['circulation_receipt'] = false;
+
+$sysconf['enable_confirmation_popup'] = false; // ENABLE CONFIRMATION POPUP MESSEGE
+$sysconf['enable_overdue_warning'] = false; // ENABLE OVERDUE WARNING
+
+
 
 /* FILE UPLOADS */
 $sysconf['max_upload'] = intval(ini_get('upload_max_filesize'))*1024;
@@ -283,23 +297,23 @@ $sysconf['mimetype']['flv'] = 'video/x-flv';
 $sysconf['mimetype']['mp4'] = 'video/mp4';
 
 /* PRICE CURRENCIES SETTING */
-$sysconf['currencies'] = array( array('0', 'NONE'), 'Rupiah', 'USD', 'Euro', 'DM', 'Pounds', 'Yen', 'Won', 'Yuan', 'Sing-D', 'Bath', 'Ruppee');
+$sysconf['currencies'] = array( array('0', 'NONE'), 'Euro');
 
 /* RESERVE PERIODE (In Days) */
 $sysconf['reserve_expire_periode'] = 7;
 
 /* CONTENT */
-$sysconf['library_name'] = 'Senayan';
-$sysconf['library_subname'] = 'Open Source Library Management System';
-$sysconf['page_footer'] = ' <strong>SENAYAN Library Automation</strong> - Pusat Informasi dan Humas Depdiknas RI - Released Under GNU GPL License';
+$sysconf['library_name'] = 'Senayan.DE';
+$sysconf['library_subname'] = 'Eine Senayan Online-B&uuml;cherei';
+$sysconf['page_footer'] = ' <strong>SENAYAN Online B&uuml;chereien</strong> - G&ouml;gelein Consulting - Released Under GNU GPL License';
 
 /* HTTPS Setting */
 $sysconf['https_enable'] = false;
 $sysconf['https_port'] = 443;
 
 /* Date Format Setting for OPAC */
-$sysconf['date_format'] = 'Y-m-d'; /* Produce 2009-12-31 */
-// $sysconf['date_format'] = 'd-M-Y'; /* Produce 31-Dec-2009 */
+//$sysconf['date_format'] = 'Y-m-d'; /* Produce 2009-12-31 */
+$sysconf['date_format'] = 'd.m.Y'; /* Produce 31.12.2009 */
 
 // load global settings from database. Uncomment below lines if you dont want to load it
 utility::loadSettings($dbs);
@@ -368,7 +382,7 @@ $sysconf['allow_pdf_download'] = true;
 $sysconf['watermark']['enable'] = true;
 $sysconf['watermark']['type'] = 'image'; # text or image, but image is not yet implemented
 $sysconf['watermark']['text'] = 'Senayan Library Management System';
-$sysconf['watermark']['image'] = '../../images/default/watermark.png';
+$sysconf['watermark']['image'] = IMAGES_BASE_DIR.'/default/watermark.png';
 $sysconf['watermark']['sizeoftext'] = '5'; # range 1 - 5
 $sysconf['watermark']['alignment'] = 'BR'; #BR, BL, TR, TL, C, R, L, T, B, where B=bottom, T=top, L=left, R=right, C=centre
 $sysconf['watermark']['color'] = 'ffffff'; # the hex color of the text

@@ -1,4 +1,7 @@
 <?php
+header("location:./");
+exit(); // (JG) we do NOT active this feature
+
 /**
  * Copyright (C) 2009 Hendro Wicaksono (hendrowicaksono@yahoo.com)
  *
