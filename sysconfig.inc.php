@@ -1,6 +1,6 @@
 <?php
 /**
- * SENAYAN application global file configuration
+ * SENAYAN application global configuration file
  *
  * Copyright (C) 2010  Arie Nugraha (dicarve@yahoo.com), Hendro Wicaksono (hendrowicaksono@yahoo.com), Wardiyono (wynerst@gmail.com)
  *
@@ -241,13 +241,17 @@ $sysconf['loan_limit_override'] = false;
 /* LOAN DATE CHANGE IN CIRCULATION */
 $sysconf['allow_loan_date_change'] = false;
 
-/* CIRCULATION RECEIPT */
+/* CIRCULATION RELATED */
 $sysconf['circulation_receipt'] = false;
 
+/* NOTIFICATION RELATED */
 $sysconf['enable_confirmation_popup'] = false; // ENABLE CONFIRMATION POPUP MESSEGE
 $sysconf['enable_overdue_warning'] = false; // ENABLE OVERDUE WARNING
-
-
+$sysconf['transaction_finished_notification'] = false;
+$sysconf['bibliography_update_notification'] = true;
+$sysconf['bibliography_item_update_notification'] = true;
+$sysconf['login_message'] = false;
+$sysconf['logout_message'] = false;
 
 /* FILE UPLOADS */
 $sysconf['max_upload'] = intval(ini_get('upload_max_filesize'))*1024;
@@ -317,6 +321,7 @@ $sysconf['date_format'] = 'd.m.Y'; /* Produce 31.12.2009 */
 
 // load global settings from database. Uncomment below lines if you dont want to load it
 utility::loadSettings($dbs);
+
 // check for user language selection if we are not in admin areas
 if (stripos($_SERVER['PHP_SELF'], '/admin') === false) {
     if (isset($_GET['select_lang'])) {
@@ -396,6 +401,11 @@ $sysconf['ucs']['enable'] = true;
 $sysconf['ucs']['auto_delete'] = true;
 // auto insert new record to UCS?
 $sysconf['ucs']['auto_insert'] = false;
+
+/**
+ * Peer to peer server config
+ */
+$sysconf['p2pserver'][1] = array('uri' => 'http://127.0.0.1/senayan3-stable14', 'name' => 'SLiMS Library');
 
 // check if session is auto started and then destroy it
 if ($is_auto = @ini_get('session.auto_start')) { define('SESSION_AUTO_STARTED', $is_auto); }
